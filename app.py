@@ -3,10 +3,14 @@ import json
 import requests
 from flask import Flask, request, jsonify, render_template
 
-app = Flask(__name__)
+# Explicitly declare absolute paths to solve serverless bundle path issues on Vercel
+basedir = os.path.abspath(os.path.dirname(__file__))
+app = Flask(__name__, 
+            template_folder=os.path.join(basedir, 'templates'),
+            static_folder=os.path.join(basedir, 'static'))
 
 # Load mock database
-DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'mock_db.json')
+DB_PATH = os.path.join(basedir, 'data', 'mock_db.json')
 mock_db = {}
 if os.path.exists(DB_PATH):
     try:
@@ -180,7 +184,11 @@ def call_gemini_api(prompt):
 # Page Routes
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        import traceback
+        return f"<h3>Flask Application Error</h3><pre>{traceback.format_exc()}</pre>", 500
 
 # API Routes
 @app.route('/api/db', methods=['GET'])
