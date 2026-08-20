@@ -18,16 +18,20 @@ if os.path.exists(DB_PATH):
 # Helper to read environment variables from .env manually
 def load_env_api_key():
     # Check project directory env file first
-    env_paths = ['.env', os.path.expanduser('~/.env')]
+    env_paths = ['.env']
+    try:
+        env_paths.append(os.path.expanduser('~/.env'))
+    except Exception:
+        pass
     for path in env_paths:
-        if os.path.exists(path):
-            try:
+        try:
+            if os.path.exists(path):
                 with open(path, 'r') as f:
                     for line in f:
                         if line.strip().startswith('GEMINI_API_KEY='):
                             return line.split('=', 1)[1].strip().strip('"').strip("'")
-            except Exception as e:
-                print(f"Error reading env path {path}: {e}")
+        except Exception as e:
+            print(f"Error reading env path {path}: {e}")
     # Fallback to standard environment variable
     return os.environ.get('GEMINI_API_KEY', '')
 
